@@ -1,3 +1,4 @@
+from re import L
 import sqlite3
 import requests
 from sqlite3 import Error
@@ -11,9 +12,9 @@ CREATE TABLE IF NOT EXISTS skins (
   Collection TEXT NOT NULL,
   WeaponType TEXT NOT NULL,
   SkinName TEXT NOT NULL,
-  Rarity TEXT NOT NULL,
-  FloatMin INT NOT NULL,
-  FloatMax INT NOT NULL,
+  Rarity TEXT,
+  FloatMin INT,
+  FloatMax INT,
   Wear TEXT NOT NULL,
   statTrak INT NOT NULL,
   Price INT NOT NULL
@@ -53,6 +54,8 @@ def execute_query(connection, query):
         print(f"The error '{e}' occurred")
 
 def scrape_setup():
+    '''Setup code for webscraping
+    returns soup object'''
     #setup code for webscraping
     website = "https://counterstrike.fandom.com/wiki/Skins/List"
     result = requests.get(website)
@@ -180,7 +183,11 @@ def collection_update(connection):
             """
             execute_query(connection, collection_insert_query)
         
+def create_tables():
+    '''Creates tables and updates collections to be used for skins updating'''
+    connection = create_connection('CSGO.sqlite')
+    execute_query(connection, create_collections_table)
+    execute_query(connection, create_skins_table)
+    collection_update(connection)
 
-connection = create_connection("CSGO.sqlite")
-execute_query(connection, create_collections_table)
-collection_update(connection)
+create_tables()
